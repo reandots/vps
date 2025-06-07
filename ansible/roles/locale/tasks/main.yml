@@ -1,0 +1,26 @@
+---
+- name: Ensure locale package is present
+  ansible.builtin.apt:
+    name: locales
+    state: present
+
+- name: Enable configured locales
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^#?{{ item | regex_escape() }}$"
+    line: "{{ item }}"
+  loop: "{{ locale_enabled_locales }}"
+  register: locale_gen_entries
+
+- name: Generate locales
+  ansible.builtin.command: locale-gen
+  when: locale_gen_entries is changed
+  changed_when: true
+
+- name: Configure default locale file
+  ansible.builtin.template:
+    src: default_locale.j2
+    dest: /etc/default/locale
+    owner: root
+    group: root
+    mode: '0644'

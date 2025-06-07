@@ -1,0 +1,13 @@
+---
+locale_vars:
+  LANG: "{{ locale_lang }}"
+  LANGUAGE: "{{ locale_lang }}"
+  LC_ADDRESS: "{{ locale_lang }}"
+  LC_IDENTIFICATION: "{{ locale_lang }}"
+  LC_MEASUREMENT: "{{ locale_lang }}"
+  LC_MONETARY: "{{ locale_lang }}"
+  LC_NAME: "{{ locale_lang }}"
+  LC_NUMERIC: "{{ locale_lang }}"
+  LC_PAPER: "{{ locale_lang }}"
+  LC_TELEPHONE: "{{ locale_lang }}"
+  LC_TIME: "{{ locale_lang }}"
