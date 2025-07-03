@@ -1,0 +1,37 @@
+# Managed by Ansible
+
+Include /etc/ssh/sshd_config.d/*.conf
+
+# Access Control
+PermitRootLogin {{ ssh_permit_root_login }}
+AllowUsers {{ ssh_allow_users | join(' ') }}
+MaxAuthTries {{ ssh_max_auth_tries }}
+
+# Network & Connection
+Port {{ ssh_port }}
+ListenAddress {{ ssh_listen_address }}
+UseDNS no
+TCPKeepAlive no
+ClientAliveInterval {{ ssh_client_alive_interval }}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+
+# Authentication
+PubkeyAuthentication yes
+PasswordAuthentication {{ 'yes' if ssh_password_authentication else 'no' }}
+AuthenticationMethods publickey
+PermitEmptyPasswords no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+UsePAM {{ 'yes' if ssh_use_pam else 'no' }}
+
+# Hardening
+IgnoreRhosts yes
+X11Forwarding no
+PrintMotd no
+AllowTcpForwarding {{ 'yes' if ssh_allow_tcp_forwarding else 'no' }}
+GatewayPorts no
+PermitTunnel no
+
+# Environment & Subsystems
+AcceptEnv LANG LC_*
+Subsystem sftp internal-sftp
