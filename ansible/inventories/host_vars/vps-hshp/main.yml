@@ -1,0 +1,7 @@
+---
+ssh_key_name: hshp
+ufw_enabled: true
+fail2ban_enabled: true
+bbr_enabled: true
+unattended_upgrades_enabled: true
+xray_enabled: true
