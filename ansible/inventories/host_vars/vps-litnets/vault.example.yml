@@ -1,0 +1,14 @@
+---
+# Copy to vault.yml and encrypt it.
+ansible_host: 1.2.3.4
+ssh_port: 22
+server_admin_user: user
+server_admin_password_hash: $REPLACE_WITH_SHA512_PASSWORD_HASH
+xray_vless_uuid: 11111111-2222-3333-4444-555555555555
+xray_reality_private_key: REPLACE_WITH_REAL_PRIVATE_KEY
+xray_reality_public_key: REPLACE_WITH_REAL_PUBLIC_KEY
+xray_reality_short_ids:
+  - a1b2c3d4e5f67890
+xray_reality_dest: site.com:443
+xray_reality_server_names:
+  - site.com
