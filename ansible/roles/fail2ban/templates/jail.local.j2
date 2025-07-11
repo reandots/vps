@@ -1,0 +1,8 @@
+[sshd]
+enabled = true
+port = {{ ssh_port }}
+filter = sshd
+logpath = {{ fail2ban_sshd_logpath }}
+maxretry = {{ fail2ban_sshd_maxretry }}
+bantime = {{ fail2ban_sshd_bantime }}
+findtime = {{ fail2ban_sshd_findtime }}
