@@ -1,0 +1,42 @@
+---
+- name: Install sudo
+  ansible.builtin.apt:
+    name: sudo
+    state: present
+    update_cache: true
+
+- name: Ensure server admin password hash is defined
+  ansible.builtin.assert:
+    that:
+      - server_admin_password_hash is defined
+      - server_admin_password_hash | string | length > 0
+      - server_admin_password_hash is match('^\$')
+    fail_msg: "Define server_admin_password_hash in ansible/inventories/host_vars/<host>/vault.yml before running bootstrap."
+
+- name: Create admin user
+  ansible.builtin.user:
+    name: "{{ server_admin_user }}"
+    groups: "{{ server_admin_groups | join(',') }}"
+    append: true
+    shell: /bin/bash
+    create_home: true
+    password: "{{ server_admin_password_hash }}"
+    update_password: on_create
+    state: present
+  no_log: true
+
+- name: Install admin public key
+  ansible.posix.authorized_key:
+    user: "{{ server_admin_user }}"
+    state: present
+    key: "{{ lookup('file', bootstrap_public_key_path) }}"
+    manage_dir: "{{ bootstrap_authorized_key_manage_dir }}"
+
+- name: Configure sudoers for admin user
+  ansible.builtin.template:
+    src: sudoers-user.j2
+    dest: "/etc/sudoers.d/{{ server_admin_user }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: "/usr/sbin/visudo -cf %s"

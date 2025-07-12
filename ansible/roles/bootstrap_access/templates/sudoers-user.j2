@@ -1,0 +1,7 @@
+Defaults lecture=never
+Defaults env_reset
+Defaults logfile=/var/log/sudo.log
+Defaults timestamp_timeout={{ sudo_timestamp_timeout_default }}
+Defaults:{{ server_admin_user }} timestamp_timeout={{ sudo_timestamp_timeout_user }}
+
+{{ server_admin_user }} ALL=(ALL:ALL) ALL
