@@ -1,0 +1,11 @@
+---
+- name: Update apt cache and install base packages
+  ansible.builtin.apt:
+    name: "{{ base_apt_packages }}"
+    state: present
+    update_cache: true
+
+- name: Run full upgrade
+  ansible.builtin.apt:
+    upgrade: full
+  when: base_upgrade_packages | bool
