@@ -1,0 +1,2 @@
+---
+sysctl_bbr_conf_path: /etc/sysctl.d/99-bbr.conf
