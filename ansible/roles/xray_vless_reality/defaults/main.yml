@@ -1,0 +1,6 @@
+---
+xray_download_url: "{{ xray_download_base_url }}/v{{ xray_version }}/Xray-{{ xray_arch }}.zip"
+xray_release_archive: "/tmp/xray-{{ xray_version }}.zip"
+xray_release_unpack_dir: "/tmp/xray-{{ xray_version }}"
+xray_version_file: /usr/local/share/xray-version
+xray_systemd_unit_path: /etc/systemd/system/{{ xray_service_name }}.service

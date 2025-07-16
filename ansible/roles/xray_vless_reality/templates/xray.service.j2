@@ -1,0 +1,16 @@
+[Unit]
+Description=Xray Service
+Documentation=https://github.com/XTLS/Xray-core
+After=network-online.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+User=root
+NoNewPrivileges=true
+ExecStart={{ xray_install_dir }}/xray run -config {{ xray_config_dir }}/config.json
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target

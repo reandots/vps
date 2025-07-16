@@ -1,0 +1,133 @@
+---
+- name: Validate required Xray variables
+  ansible.builtin.assert:
+    that:
+      - xray_vless_uuid is defined
+      - xray_reality_private_key is defined
+      - xray_reality_short_ids is defined
+      - xray_reality_short_ids | length > 0
+      - xray_reality_server_names | length > 0
+    fail_msg: "Define Xray variables in host_vars/*.vault.yml before enabling the role."
+
+- name: Ensure Xray directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ xray_config_dir }}"
+    - /usr/local/share
+
+- name: Check current Xray version marker
+  ansible.builtin.stat:
+    path: "{{ xray_version_file }}"
+  register: xray_version_marker
+
+- name: Read current Xray version marker
+  ansible.builtin.slurp:
+    src: "{{ xray_version_file }}"
+  when: xray_version_marker.stat.exists
+  register: xray_version_marker_content
+
+- name: Derive installed Xray version
+  ansible.builtin.set_fact:
+    xray_installed_version: "{{ (xray_version_marker_content.content | b64decode | trim) if xray_version_marker.stat.exists else '' }}"
+
+- name: Download Xray release archive
+  ansible.builtin.get_url:
+    url: "{{ xray_download_url }}"
+    dest: "{{ xray_release_archive }}"
+    mode: '0644'
+  when: xray_installed_version != xray_version
+
+- name: Recreate temporary Xray unpack directory
+  ansible.builtin.file:
+    path: "{{ xray_release_unpack_dir }}"
+    state: absent
+  when: xray_installed_version != xray_version
+
+- name: Create temporary Xray unpack directory
+  ansible.builtin.file:
+    path: "{{ xray_release_unpack_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: xray_installed_version != xray_version
+
+- name: Unpack Xray release archive
+  ansible.builtin.unarchive:
+    src: "{{ xray_release_archive }}"
+    dest: "{{ xray_release_unpack_dir }}"
+    remote_src: true
+  when: xray_installed_version != xray_version
+
+- name: Install Xray binary
+  ansible.builtin.copy:
+    src: "{{ xray_release_unpack_dir }}/xray"
+    dest: "{{ xray_install_dir }}/xray"
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: true
+  when: xray_installed_version != xray_version
+  notify: Restart xray
+
+- name: Install Xray geoip data
+  ansible.builtin.copy:
+    src: "{{ xray_release_unpack_dir }}/geoip.dat"
+    dest: "{{ xray_install_dir }}/geoip.dat"
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: true
+  when: xray_installed_version != xray_version
+  notify: Restart xray
+
+- name: Install Xray geosite data
+  ansible.builtin.copy:
+    src: "{{ xray_release_unpack_dir }}/geosite.dat"
+    dest: "{{ xray_install_dir }}/geosite.dat"
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: true
+  when: xray_installed_version != xray_version
+  notify: Restart xray
+
+- name: Persist installed Xray version marker
+  ansible.builtin.copy:
+    dest: "{{ xray_version_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+    content: "{{ xray_version }}\n"
+  when: xray_installed_version != xray_version
+
+- name: Install Xray systemd unit
+  ansible.builtin.template:
+    src: xray.service.j2
+    dest: "{{ xray_systemd_unit_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Install Xray config
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ xray_config_dir }}/config.json"
+    owner: root
+    group: root
+    mode: '0600'
+    validate: "{{ xray_install_dir }}/xray run -test -config %s"
+  notify: Restart xray
+
+- name: Ensure Xray service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ xray_service_name }}"
+    daemon_reload: true
+    enabled: true
+    state: started
