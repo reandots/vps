@@ -1,0 +1,50 @@
+---
+- name: Bootstrap VPS access
+  hosts: all
+  gather_facts: false
+  become: "{{ bootstrap_use_become }}"
+  vars_prompt:
+    - name: bootstrap_user
+      prompt: "Initial SSH user for first login"
+      private: false
+      default: root
+
+    - name: bootstrap_port
+      prompt: "Initial SSH port for first login"
+      private: false
+      default: "22"
+
+    - name: bootstrap_password
+      prompt: "Initial SSH password"
+      private: true
+
+    - name: bootstrap_become_password
+      prompt: "sudo password for initial user (press Enter to reuse SSH password)"
+      private: true
+      default: ""
+
+  vars:
+    ansible_user: "{{ bootstrap_user }}"
+    ansible_port: "{{ bootstrap_port }}"
+    ansible_password: "{{ bootstrap_password }}"
+    ansible_become_password: "{{ bootstrap_become_password | default(bootstrap_password, true) }}"
+    bootstrap_use_become: "{{ bootstrap_user != 'root' }}"
+    bootstrap_public_key_path: "{{ lookup('env', 'HOME') }}/.ssh/{{ ssh_key_name }}.pub"
+  pre_tasks:
+    - name: Ensure ansible_host is defined for target host
+      ansible.builtin.assert:
+        that:
+          - ansible_host is defined
+          - ansible_host | string | length > 0
+        fail_msg: "Define ansible_host in ansible/inventories/host_vars/<host>/vault.yml before running bootstrap."
+
+    - name: Ensure bootstrap user was provided
+      ansible.builtin.assert:
+        that:
+          - bootstrap_user is defined
+          - bootstrap_user | length > 0
+        fail_msg: "Specify a non-empty initial SSH user when prompted."
+
+  roles:
+    - role: bootstrap_access
+    - role: ssh_hardening
