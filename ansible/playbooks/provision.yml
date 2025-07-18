@@ -1,0 +1,25 @@
+---
+- name: Provision VPS services
+  hosts: all
+  gather_facts: true
+  become: true
+  pre_tasks:
+    - name: Ensure ansible_host is defined for target host
+      ansible.builtin.assert:
+        that:
+          - ansible_host is defined
+          - ansible_host | string | length > 0
+        fail_msg: "Define ansible_host in ansible/inventories/host_vars/<host>/vault.yml before running provision."
+  roles:
+    - role: base_system
+    - role: locale
+    - role: firewall_ufw
+      when: ufw_enabled | bool
+    - role: fail2ban
+      when: fail2ban_enabled | bool
+    - role: sysctl_bbr
+      when: bbr_enabled | bool
+    - role: unattended_upgrades
+      when: unattended_upgrades_enabled | bool
+    - role: xray_vless_reality
+      when: xray_enabled | bool or 'xray' in group_names
