@@ -1,0 +1,69 @@
+---
+ansible_user: "{{ server_admin_user }}"
+ansible_port: "{{ ssh_port }}"
+ansible_ssh_private_key_file: "{{ lookup('env', 'HOME') }}/.ssh/{{ ssh_key_name }}"
+
+server_admin_user: user
+server_admin_groups:
+  - sudo
+
+ssh_key_name: vps_default
+ssh_port: 2222
+ssh_allow_users:
+  - "{{ server_admin_user }}"
+ssh_max_auth_tries: 3
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 8
+ssh_use_pam: true
+ssh_allow_tcp_forwarding: true
+ssh_password_authentication: false
+ssh_permit_root_login: "no"
+
+sudo_timestamp_timeout_default: 30
+sudo_timestamp_timeout_user: 120
+
+base_apt_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - locales
+  - sudo
+  - unzip
+  - htop
+  - micro
+
+locale_lang: en_US.UTF-8
+locale_enabled_locales:
+  - en_US.UTF-8 UTF-8
+
+ufw_enabled: true
+ufw_open_tcp_ports:
+  - "{{ ssh_port }}"
+  - 443
+ufw_open_udp_ports:
+  - 443
+
+fail2ban_enabled: true
+fail2ban_sshd_maxretry: 3
+fail2ban_sshd_bantime: 1h
+fail2ban_sshd_findtime: 10m
+
+bbr_enabled: true
+
+unattended_upgrades_enabled: true
+unattended_upgrades_auto_reboot: false
+unattended_upgrades_auto_reboot_time: "05:00"
+
+xray_enabled: false
+xray_version: "26.3.27"
+xray_arch: linux-64
+xray_install_dir: /usr/local/bin
+xray_config_dir: /usr/local/etc/xray
+xray_service_name: xray
+xray_download_base_url: https://github.com/xtls/xray-core/releases/download
+xray_reality_dest: example.com:443
+xray_reality_server_names:
+  - example.com
+xray_vless_port: 443
+xray_vless_flow: xtls-rprx-vision
