@@ -1,0 +1,5 @@
+*.retry
+*.pyc
+__pycache__/
+.ansible/
+.DS_Store
