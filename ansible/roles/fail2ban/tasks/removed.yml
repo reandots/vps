@@ -1,0 +1,23 @@
+---
+- name: Inspect managed fail2ban config before removal
+  ansible.builtin.stat:
+    path: /etc/fail2ban/jail.local
+  register: fail2ban_remove_config
+
+- name: Refuse recursive removal of a fail2ban directory
+  ansible.builtin.assert:
+    that:
+      - not (fail2ban_remove_config.stat.isdir | default(false))
+    fail_msg: "Expected /etc/fail2ban/jail.local to be a file, not a directory."
+
+- name: Remove fail2ban package without removing shared dependencies
+  ansible.builtin.apt:
+    name: fail2ban
+    state: absent
+    purge: false
+    autoremove: false
+
+- name: Remove managed fail2ban config
+  ansible.builtin.file:
+    path: /etc/fail2ban/jail.local
+    state: absent

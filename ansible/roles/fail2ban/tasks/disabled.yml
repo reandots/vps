@@ -1,0 +1,13 @@
+---
+- name: Gather service facts before disabling fail2ban
+  ansible.builtin.service_facts:
+  register: fail2ban_service_facts
+
+- name: Stop and disable installed fail2ban service
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: false
+    state: stopped
+  when:
+    - "'fail2ban.service' in fail2ban_service_facts.ansible_facts.services"
+    - fail2ban_service_facts.ansible_facts.services['fail2ban.service'].status != 'not-found'

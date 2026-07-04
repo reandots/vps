@@ -1,2 +1,4 @@
 ---
+fail2ban_state: enabled
+
 fail2ban_sshd_logpath: /var/log/auth.log

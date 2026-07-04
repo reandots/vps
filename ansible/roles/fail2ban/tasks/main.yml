@@ -1,20 +1,20 @@
 ---
-- name: Install fail2ban
-  ansible.builtin.apt:
-    name: fail2ban
-    state: present
+- name: Validate fail2ban lifecycle state
+  ansible.builtin.assert:
+    that:
+      - fail2ban_state in ['enabled', 'disabled', 'removed']
+      - fail2ban_enabled is not defined
+      - fail2ban_managed is not defined
+    fail_msg: "Use fail2ban_state: enabled, disabled or removed; replace legacy fail2ban_enabled/fail2ban_managed variables."
 
-- name: Configure fail2ban jail.local
-  ansible.builtin.template:
-    src: jail.local.j2
-    dest: /etc/fail2ban/jail.local
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Restart fail2ban
+- name: Configure enabled fail2ban
+  ansible.builtin.import_tasks: enabled.yml
+  when: fail2ban_state == 'enabled'
 
-- name: Ensure fail2ban service is enabled
-  ansible.builtin.service:
-    name: fail2ban
-    enabled: true
-    state: started
+- name: Disable fail2ban without removing its files
+  ansible.builtin.import_tasks: disabled.yml
+  when: fail2ban_state in ['disabled', 'removed']
+
+- name: Remove fail2ban installation and managed config
+  ansible.builtin.import_tasks: removed.yml
+  when: fail2ban_state == 'removed'
