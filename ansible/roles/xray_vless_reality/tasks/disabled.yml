@@ -1,0 +1,13 @@
+---
+- name: Gather service facts before disabling Xray
+  ansible.builtin.service_facts:
+  register: xray_service_facts
+
+- name: Stop and disable installed Xray service
+  ansible.builtin.systemd:
+    name: "{{ xray_service_name }}"
+    enabled: false
+    state: stopped
+  when:
+    - (xray_service_name ~ '.service') in xray_service_facts.ansible_facts.services
+    - xray_service_facts.ansible_facts.services[xray_service_name ~ '.service'].status != 'not-found'

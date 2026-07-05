@@ -1,0 +1,30 @@
+---
+- name: Inspect managed Xray files before removal
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ xray_install_dir }}/xray"
+    - "{{ xray_install_dir }}/geoip.dat"
+    - "{{ xray_install_dir }}/geosite.dat"
+    - "{{ xray_config_dir }}/config.json"
+    - "{{ xray_version_file }}"
+    - "{{ xray_systemd_unit_path }}"
+  register: xray_remove_files
+
+- name: Refuse recursive removal of Xray directories
+  ansible.builtin.assert:
+    that:
+      - not (item.stat.isdir | default(false))
+    fail_msg: "Expected managed Xray artifacts to be files, not directories."
+  loop: "{{ xray_remove_files.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Remove managed Xray files
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    state: absent
+  loop: "{{ xray_remove_files.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  notify: Reload systemd
