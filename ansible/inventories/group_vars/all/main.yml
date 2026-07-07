@@ -44,7 +44,7 @@ ufw_open_tcp_ports:
 ufw_open_udp_ports:
   - 443
 
-fail2ban_enabled: true
+fail2ban_state: enabled
 fail2ban_sshd_maxretry: 3
 fail2ban_sshd_bantime: 1h
 fail2ban_sshd_findtime: 10m
@@ -55,7 +55,7 @@ unattended_upgrades_enabled: true
 unattended_upgrades_auto_reboot: false
 unattended_upgrades_auto_reboot_time: "05:00"
 
-xray_enabled: false
+xray_state: disabled
 xray_version: "26.3.27"
 xray_arch: linux-64
 xray_install_dir: /usr/local/bin
