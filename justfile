@@ -11,6 +11,9 @@ litnets_host := "vps-litnets"
 install:
     ansible-galaxy collection install -r requirements.yml
 
+test:
+    python3 -m unittest discover -s tests -v
+
 hash-password:
     openssl passwd -6
 
