@@ -1,2 +1,7 @@
 ---
+server_admin_groups:
+  - sudo
+sudo_timestamp_timeout_default: 30
+sudo_timestamp_timeout_user: 120
+
 bootstrap_authorized_key_manage_dir: true
