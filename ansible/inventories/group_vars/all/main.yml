@@ -22,14 +22,8 @@ ssh_permit_root_login: "no"
 sudo_timestamp_timeout_default: 30
 sudo_timestamp_timeout_user: 120
 
-base_apt_packages:
-  - apt-transport-https
-  - ca-certificates
-  - curl
-  - gnupg
-  - locales
-  - sudo
-  - unzip
+# Optional operator utilities; essential packages live in base_system defaults.
+base_extra_apt_packages:
   - htop
   - micro
 

@@ -1,2 +1,11 @@
 ---
-base_upgrade_packages: true
+base_apt_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - locales
+  - sudo
+  - unzip
+base_extra_apt_packages: []
+base_apt_cache_valid_time: 3600

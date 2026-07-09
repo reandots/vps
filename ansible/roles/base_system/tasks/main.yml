@@ -1,11 +1,13 @@
 ---
+- name: Reject legacy package upgrade option
+  ansible.builtin.assert:
+    that:
+      - base_upgrade_packages is not defined
+    fail_msg: "Remove base_upgrade_packages; use the separate upgrade.yml playbook for package upgrades."
+
 - name: Update apt cache and install base packages
   ansible.builtin.apt:
-    name: "{{ base_apt_packages }}"
+    name: "{{ (base_apt_packages + base_extra_apt_packages) | unique }}"
     state: present
     update_cache: true
-
-- name: Run full upgrade
-  ansible.builtin.apt:
-    upgrade: full
-  when: base_upgrade_packages | bool
+    cache_valid_time: "{{ base_apt_cache_valid_time }}"
