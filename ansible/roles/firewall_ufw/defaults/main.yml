@@ -1,3 +1,7 @@
 ---
+ufw_open_tcp_ports:
+  - "{{ ssh_port }}"
+ufw_open_udp_ports: []
+
 ufw_default_incoming: deny
 ufw_default_outgoing: allow
