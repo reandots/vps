@@ -1,4 +1,7 @@
 ---
 fail2ban_state: enabled
+fail2ban_sshd_maxretry: 3
+fail2ban_sshd_bantime: 1h
+fail2ban_sshd_findtime: 10m
 
 fail2ban_sshd_logpath: /var/log/auth.log
