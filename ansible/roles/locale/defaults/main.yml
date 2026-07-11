@@ -1,4 +1,8 @@
 ---
+locale_lang: en_US.UTF-8
+locale_enabled_locales:
+  - en_US.UTF-8 UTF-8
+
 locale_vars:
   LANG: "{{ locale_lang }}"
   LANGUAGE: "{{ locale_lang }}"
