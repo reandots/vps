@@ -1,4 +1,7 @@
 ---
+unattended_upgrades_auto_reboot: false
+unattended_upgrades_auto_reboot_time: "05:00"
+
 unattended_upgrades_origins:
   - 'origin=Debian,codename=${distro_codename},label=Debian-Security'
   - 'origin=Debian,codename=${distro_codename},label=Debian'
