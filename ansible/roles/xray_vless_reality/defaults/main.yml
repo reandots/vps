@@ -1,9 +1,27 @@
 ---
 xray_state: disabled
+xray_version: "26.3.27"
+xray_install_dir: /usr/local/bin
+xray_config_dir: /usr/local/etc/xray
 xray_service_name: xray
+xray_download_base_url: https://github.com/xtls/xray-core/releases/download
+xray_reality_dest: example.com:443
+xray_reality_server_names:
+  - example.com
+xray_vless_port: 443
+xray_vless_flow: xtls-rprx-vision
+
+xray_arch_map:
+  x86_64: linux-64
+  aarch64: linux-arm64-v8a
+xray_arch: "{{ xray_arch_map.get(ansible_facts.get('architecture', ''), '') }}"
+# SHA-256 digests from the official GitHub release asset metadata.
+xray_release_checksums:
+  "26.3.27":
+    linux-64: sha256:23cd9af937744d97776ee35ecad4972cf4b2109d1e0fe6be9930467608f7c8ae
+    linux-arm64-v8a: sha256:4d30283ae614e3057f730f67cd088a42be6fdf91f8639d82cb69e48cde80413c
+xray_release_checksum: "{{ xray_release_checksums.get(xray_version, {}).get(xray_arch, '') }}"
 
 xray_download_url: "{{ xray_download_base_url }}/v{{ xray_version }}/Xray-{{ xray_arch }}.zip"
-xray_release_archive: "/tmp/xray-{{ xray_version }}.zip"
-xray_release_unpack_dir: "/tmp/xray-{{ xray_version }}"
 xray_version_file: /usr/local/share/xray-version
 xray_systemd_unit_path: /etc/systemd/system/{{ xray_service_name }}.service

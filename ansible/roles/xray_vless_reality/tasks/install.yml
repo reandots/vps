@@ -1,0 +1,62 @@
+---
+- name: Ensure Xray installation directory exists
+  ansible.builtin.file:
+    path: "{{ xray_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create private Xray staging directory
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: xray-
+  register: xray_staging
+
+- name: Install verified Xray release from staging
+  block:
+    - name: Download and verify Xray release archive
+      ansible.builtin.get_url:
+        url: "{{ xray_download_url }}"
+        dest: "{{ xray_staging.path }}/release.zip"
+        checksum: "{{ xray_release_checksum }}"
+        mode: '0600'
+
+    - name: Unpack verified Xray release
+      ansible.builtin.unarchive:
+        src: "{{ xray_staging.path }}/release.zip"
+        dest: "{{ xray_staging.path }}"
+        remote_src: true
+
+    - name: Check staged Xray binary before replacing installed files
+      ansible.builtin.command:
+        argv:
+          - "{{ xray_staging.path }}/xray"
+          - version
+      register: xray_staged_version
+      changed_when: false
+
+    - name: Ensure staged Xray has the requested version
+      ansible.builtin.assert:
+        that:
+          - (xray_staged_version.stdout | regex_findall('^Xray ([^ ]+)') | first | default('')) == xray_version
+        fail_msg: "The staged Xray binary does not report the requested version."
+
+    - name: Install verified Xray binary and data
+      ansible.builtin.copy:
+        src: "{{ xray_staging.path }}/{{ item }}"
+        dest: "{{ xray_install_dir }}/{{ item }}"
+        owner: root
+        group: root
+        mode: "{{ '0755' if item == 'xray' else '0644' }}"
+        remote_src: true
+      loop:
+        - xray
+        - geoip.dat
+        - geosite.dat
+      notify: Restart xray
+  always:
+    - name: Remove private Xray staging directory
+      ansible.builtin.file:
+        path: "{{ xray_staging.path }}"
+        state: absent

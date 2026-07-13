@@ -1,0 +1,39 @@
+---
+- name: Validate Xray release architecture and checksum
+  ansible.builtin.assert:
+    that:
+      - xray_arch | length > 0
+      - xray_release_checksum is match('^sha256:[a-fA-F0-9]{64}$')
+    fail_msg: "Unsupported architecture or missing checksum. Set xray_arch and a trusted xray_release_checksum for the selected version if needed."
+
+- name: Inspect installed Xray artifacts
+  ansible.builtin.stat:
+    path: "{{ xray_install_dir }}/{{ item }}"
+    get_checksum: false
+  loop:
+    - xray
+    - geoip.dat
+    - geosite.dat
+  register: xray_artifacts
+
+- name: Read actual installed Xray version
+  ansible.builtin.command:
+    argv:
+      - "{{ xray_install_dir }}/xray"
+      - version
+  register: xray_binary_version
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when:
+    - xray_artifacts.results[0].stat.isreg | default(false)
+    - xray_artifacts.results[0].stat.executable | default(false)
+
+- name: Determine whether Xray installation needs repair
+  ansible.builtin.set_fact:
+    xray_install_required: >-
+      {{ xray_binary_version.rc | default(1) != 0
+         or (xray_binary_version.stdout | default('') | regex_findall('^Xray ([^ ]+)') | first | default('')) != xray_version
+         or xray_artifacts.results | selectattr('stat.isreg', 'undefined') | list | length > 0
+         or xray_artifacts.results | selectattr('stat.isreg', 'defined') | rejectattr('stat.isreg') | list | length > 0
+         or xray_artifacts.results | selectattr('stat.size', 'defined') | selectattr('stat.size', 'equalto', 0) | list | length > 0 }}

@@ -1,4 +1,5 @@
 ---
+# Shared access policy and connection variables.
 ansible_user: "{{ server_admin_user }}"
 ansible_port: "{{ ssh_port }}"
 ansible_ssh_private_key_file: "{{ lookup('env', 'HOME') }}/.ssh/{{ ssh_key_name }}"
@@ -49,15 +50,6 @@ unattended_upgrades_enabled: true
 unattended_upgrades_auto_reboot: false
 unattended_upgrades_auto_reboot_time: "05:00"
 
+# Desired service state and pinned release; installation details are role defaults.
 xray_state: disabled
 xray_version: "26.3.27"
-xray_arch: linux-64
-xray_install_dir: /usr/local/bin
-xray_config_dir: /usr/local/etc/xray
-xray_service_name: xray
-xray_download_base_url: https://github.com/xtls/xray-core/releases/download
-xray_reality_dest: example.com:443
-xray_reality_server_names:
-  - example.com
-xray_vless_port: 443
-xray_vless_flow: xtls-rprx-vision

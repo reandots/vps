@@ -1,0 +1,49 @@
+---
+- name: Ensure Xray directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ xray_config_dir }}"
+    - "{{ xray_version_file | dirname }}"
+
+- name: Install Xray systemd unit
+  ansible.builtin.template:
+    src: xray.service.j2
+    dest: "{{ xray_systemd_unit_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd
+    - Restart xray
+
+- name: Install Xray config
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ xray_config_dir }}/config.json"
+    owner: root
+    group: root
+    mode: '0600'
+    validate: "{{ xray_install_dir }}/xray run -test -config %s"
+  diff: false
+  no_log: true
+  notify: Restart xray
+
+- name: Ensure Xray service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ xray_service_name }}"
+    daemon_reload: true
+    enabled: true
+    state: started
+
+- name: Persist informational Xray version marker
+  ansible.builtin.copy:
+    dest: "{{ xray_version_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+    content: "{{ xray_version }}\n"
