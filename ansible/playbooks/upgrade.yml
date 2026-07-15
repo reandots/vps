@@ -1,0 +1,34 @@
+---
+- name: Upgrade VPS system packages
+  hosts: all
+  gather_facts: true
+  become: true
+  pre_tasks:
+    - name: Ensure ansible_host is defined for target host
+      ansible.builtin.assert:
+        that:
+          - ansible_host is defined
+          - ansible_host | string | length > 0
+        fail_msg: "Define ansible_host in ansible/inventories/host_vars/<host>/vault.yml before running upgrade."
+
+    - name: Ensure the target uses Debian package management
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family == 'Debian'
+        fail_msg: "The upgrade playbook requires Debian-family package management."
+
+  tasks:
+    - name: Update apt cache and run full upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: full
+
+    - name: Check whether the system requests a reboot
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: upgrade_reboot_required
+
+    - name: Report requested reboot without rebooting automatically
+      ansible.builtin.debug:
+        msg: "A reboot is required. Schedule it separately; this playbook does not reboot the VPS."
+      when: upgrade_reboot_required.stat.exists

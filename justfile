@@ -35,6 +35,12 @@ provision-hshp:
 provision-litnets:
     ansible-playbook -i {{ inventory }} {{ vault_arg }} {{ become_arg }} {{ playbook_dir }}/provision.yml --limit {{ litnets_host }} --diff
 
+upgrade-hshp:
+    ansible-playbook -i {{ inventory }} {{ vault_arg }} {{ become_arg }} {{ playbook_dir }}/upgrade.yml --limit {{ hshp_host }} --diff
+
+upgrade-litnets:
+    ansible-playbook -i {{ inventory }} {{ vault_arg }} {{ become_arg }} {{ playbook_dir }}/upgrade.yml --limit {{ litnets_host }} --diff
+
 vault-edit FILE:
     ansible-vault edit {{ FILE }}
 
